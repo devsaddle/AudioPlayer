@@ -15,6 +15,7 @@
 		7C777B781F1601E400A3BF91 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7C777B761F1601E400A3BF91 /* LaunchScreen.storyboard */; };
 		7C777B831F1601E400A3BF91 /* AudioPlayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C777B821F1601E400A3BF91 /* AudioPlayerTests.m */; };
 		7C777B8E1F1601E400A3BF91 /* AudioPlayerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C777B8D1F1601E400A3BF91 /* AudioPlayerUITests.m */; };
+		7C777B9D1F16167900A3BF91 /* AudioPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C777B9C1F16167900A3BF91 /* AudioPlayer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,8 @@
 		7C777B891F1601E400A3BF91 /* AudioPlayerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudioPlayerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C777B8D1F1601E400A3BF91 /* AudioPlayerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudioPlayerUITests.m; sourceTree = "<group>"; };
 		7C777B8F1F1601E400A3BF91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7C777B9B1F16167900A3BF91 /* AudioPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioPlayer.h; sourceTree = "<group>"; };
+		7C777B9C1F16167900A3BF91 /* AudioPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioPlayer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +108,8 @@
 				7C777B6C1F1601E400A3BF91 /* AppDelegate.m */,
 				7C777B6E1F1601E400A3BF91 /* ViewController.h */,
 				7C777B6F1F1601E400A3BF91 /* ViewController.m */,
+				7C777B9B1F16167900A3BF91 /* AudioPlayer.h */,
+				7C777B9C1F16167900A3BF91 /* AudioPlayer.m */,
 				7C777B711F1601E400A3BF91 /* Main.storyboard */,
 				7C777B741F1601E400A3BF91 /* Assets.xcassets */,
 				7C777B761F1601E400A3BF91 /* LaunchScreen.storyboard */,
@@ -279,6 +284,7 @@
 				7C777B701F1601E400A3BF91 /* ViewController.m in Sources */,
 				7C777B6D1F1601E400A3BF91 /* AppDelegate.m in Sources */,
 				7C777B6A1F1601E400A3BF91 /* main.m in Sources */,
+				7C777B9D1F16167900A3BF91 /* AudioPlayer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
