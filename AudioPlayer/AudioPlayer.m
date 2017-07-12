@@ -35,7 +35,7 @@
     AVQueuePlayer *avplayer = [[AVQueuePlayer alloc] initWithItems:self.playItemList];
     avplayer.volume = 0.5;
     self.avplayer = avplayer;
-
+    [self addObserver];
 }
 
 - (AVPlayerItem *)playerItemWithUrl:(NSURL *)url {
@@ -72,7 +72,7 @@
 }
 
 - (id)getCurrentPlayItem {
-    return nil;
+    return self.avplayer.currentItem;
 }
 
 - (void)addQueueToPlayerFromArray:(NSArray *)array {
@@ -114,14 +114,49 @@
     }
 }
 
+- (void)playbackFinished:(NSNotification *)notifi {
+    
+    NSLog(@"播放完成 %@",notifi);
+    
+}
+
+- (void)playtime:(NSNotification *)notifi {
+    NSLog(@"时间改变 %@",notifi);
+    
+}
 
 #pragma mark - Observer 
 - (void)addObserver {
+    //监控状态属性，注意AVPlayer也有一个status属性，通过监控它的status也可以获得播放状态
+    [self.avplayer.currentItem addObserver:self forKeyPath:@"status" options:(NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew) context:nil];
+    
+    //监控缓冲加载情况属性
+    [self.avplayer.currentItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
+    
+    //监控播放完成通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackFinished:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avplayer.currentItem];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playtime:) name:AVPlayerItemTimeJumpedNotification object:self.avplayer.currentItem];
+    
+    //监控时间进度
+    [self.avplayer addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+        CMTimeShow(time);
+        
+    }];
     
 }
 
 - (void)removeServer {
+    [self.avplayer.currentItem removeObserver:self forKeyPath:@"status"];
+    [self.avplayer.currentItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
+    [[NSNotificationCenter defaultCenter] removeObserver:AVPlayerItemDidPlayToEndTimeNotification];
+    
+}
 
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    
+    NSLog(@"%@--- %@",keyPath,change);
+    
 }
 
 #pragma mark - Lazy Load
