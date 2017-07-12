@@ -27,6 +27,8 @@
     // Dispose of any resources that can be recreated.
 }
 - (IBAction)last:(id)sender {
+    [[AudioPlayer shareManager] last];
+
 }
 
 - (IBAction)start:(id)sender {

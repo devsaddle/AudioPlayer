@@ -52,11 +52,19 @@
 }
 
 - (void)addItem:(id)item {
-
+    if (item) {
+        [self.playItemList addObject:item];
+        AVPlayerItem *playerItem = [self playerItemWithUrl:[NSURL URLWithString:item]];
+        if ([self.avplayer canInsertItem:playerItem afterItem:[[self.avplayer items] lastObject]]) {
+            [self.avplayer insertItem:playerItem afterItem:[[self.avplayer items] lastObject]];
+        }
+    }
 }
 
 - (void)removeItem:(id)item {
-
+    [self.playItemList removeObject:item];
+    AVPlayerItem *playerItem = [self playerItemWithUrl:[NSURL URLWithString:item]];
+    [self.avplayer removeItem:playerItem];
 }
 
 - (NSArray *)getCurrentPlayList {
@@ -97,7 +105,13 @@
 }
 
 - (void)last {
-
+    AVPlayerItem *currentItem = [self.avplayer currentItem];
+    NSUInteger currentIndex = [self.playItemList indexOfObject:currentItem];
+    if (currentIndex > 0) {
+        AVPlayerItem *lastItem = [self.playItemList objectAtIndex:--currentIndex];
+        [self.avplayer replaceCurrentItemWithPlayerItem:lastItem];
+        [self play];
+    }
 }
 
 
