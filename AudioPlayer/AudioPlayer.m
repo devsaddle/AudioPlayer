@@ -23,6 +23,9 @@
 /** Load Progress Block */
 @property (nonatomic, copy) void(^loadProgressBlock)(NSTimeInterval current,NSTimeInterval total);
 
+/** Play Finsish  Block */
+@property (nonatomic, copy) void(^playFinishBlock)(id item);
+
 @end
 
 @implementation AudioPlayer
@@ -39,8 +42,11 @@
 #pragma mark - Player Init
 - (void)avplayerInit {
     AVQueuePlayer *avplayer = [[AVQueuePlayer alloc] initWithItems:self.playItemList];
-    avplayer.volume = 0.5;
+    avplayer.volume = 1.0;
     self.avplayer = avplayer;
+    
+    //监控播放完成通知
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackFinished:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avplayer.currentItem];
     
     __weak typeof(self)weakSelf = self;
     //监控时间进度
@@ -51,6 +57,8 @@
         NSTimeInterval current = CMTimeGetSeconds(time);
         //视频的总时间
         NSTimeInterval total = CMTimeGetSeconds(strongSelf.avplayer.currentItem.duration);
+        
+        // 回调上层
         if (strongSelf.playProgressBlock) {
             strongSelf.playProgressBlock(current,total);
         }
@@ -61,8 +69,7 @@
 - (AVPlayerItem *)playerItemWithUrl:(NSURL *)url {
     AVPlayerItem *item = [[AVPlayerItem alloc] initWithURL:url];
     [self addObserverForItem:item];
-
-
+    
     return item;
 }
 
@@ -89,6 +96,7 @@
 - (void)removeItem:(id)item {
     [self.playItemList removeObject:item];
     AVPlayerItem *playerItem = [self playerItemWithUrl:[NSURL URLWithString:item]];
+    [self removeObserverForItem:playerItem];
     [self.avplayer removeItem:playerItem];
 }
 
@@ -97,6 +105,7 @@
 }
 
 - (id)getCurrentPlayItem {
+    // TODO: 对外数据包装
     return self.avplayer.currentItem;
 }
 
@@ -137,6 +146,7 @@
     
     if (currentIndex < self.playItemList.count - 1) {
         [self.avplayer advanceToNextItem];
+        [self play];
     }
     
 //    if (currentIndex == self.playItemList.count - 1) {
@@ -159,6 +169,7 @@
         if ([self.avplayer canInsertItem:lastItem afterItem:currentItem]) {
             [self.avplayer insertItem:lastItem afterItem:currentItem];
             [self.avplayer advanceToNextItem];
+            [self play];
             
             if ([self.avplayer canInsertItem:currentItem afterItem:lastItem]) {
                 [self.avplayer insertItem:currentItem afterItem:lastItem];
@@ -172,14 +183,12 @@
     return YES;
 }
 
-- (void)playbackFinished:(NSNotification *)notifi {
-    
-    AVPlayerItem *item = notifi.object;
-    [item seekToTime:kCMTimeZero];
-    NSLog(@"播放完成 %@",notifi);
-    
-}
 
+#pragma mark - Call Back
+
+- (void)playFinish:(void(^)(id item))finishBlock {
+    _playFinishBlock = finishBlock;
+}
 
 
 - (void)playProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))changedBlock {
@@ -190,23 +199,24 @@
     _loadProgressBlock = loadBlock;
 }
 
+
+
 #pragma mark - Observer 
 - (void)addObserverForItem:(AVPlayerItem *)item {
-    //监控状态属性，注意AVPlayer也有一个status属性，通过监控它的status也可以获得播放状态
-    [item addObserver:self forKeyPath:@"status" options:(NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew) context:nil];
+    //监控状态属性
+    [item addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
 
     //监控缓冲加载情况属性
     [item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
+    
     [item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
-    //监控播放完成通知
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackFinished:) name:AVPlayerItemDidPlayToEndTimeNotification object:item];
     
 }
 
-- (void)removeServerForItem:(AVPlayerItem *)item {
+- (void)removeObserverForItem:(AVPlayerItem *)item {
     [self.avplayer.currentItem removeObserver:self forKeyPath:@"status"];
     [self.avplayer.currentItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
-    [[NSNotificationCenter defaultCenter] removeObserver:AVPlayerItemDidPlayToEndTimeNotification];
+    [self.avplayer.currentItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
     
 }
 
@@ -247,6 +257,17 @@
     NSTimeInterval result = startSeconds + durationSeconds;// 计算缓冲总进度
     return result;
 }
+
+- (void)playbackFinished:(NSNotification *)notifi {
+    
+    AVPlayerItem *item = notifi.object;
+    [item seekToTime:kCMTimeZero];
+    if (_playFinishBlock) {
+        // TODO: 对外数据包装
+        _playFinishBlock(item);
+    }
+}
+
 #pragma mark - Lazy Load
 
 - (NSMutableArray *)playItemList {

@@ -32,10 +32,14 @@
 
 
 /**
+ 播放完成回调
+ */
+- (void)playFinish:(void(^)(id item))finishBlock;
+
+/**
  播放进度回调
  */
 - (void)playProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))changedBlock;
-
 
 /**
  加载进度回调

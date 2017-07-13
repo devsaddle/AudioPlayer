@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C7263CA1F17C32E0017571E /* AudioItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1C7263C91F17C32E0017571E /* AudioItem.m */; };
 		7C777B6A1F1601E400A3BF91 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C777B691F1601E400A3BF91 /* main.m */; };
 		7C777B6D1F1601E400A3BF91 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C777B6C1F1601E400A3BF91 /* AppDelegate.m */; };
 		7C777B701F1601E400A3BF91 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7C777B6F1F1601E400A3BF91 /* ViewController.m */; };
@@ -36,6 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1C7263C81F17C32E0017571E /* AudioItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AudioItem.h; sourceTree = "<group>"; };
+		1C7263C91F17C32E0017571E /* AudioItem.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudioItem.m; sourceTree = "<group>"; };
 		7C777B651F1601E400A3BF91 /* AudioPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C777B691F1601E400A3BF91 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		7C777B6B1F1601E400A3BF91 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -110,6 +113,8 @@
 				7C777B6F1F1601E400A3BF91 /* ViewController.m */,
 				7C777B9B1F16167900A3BF91 /* AudioPlayer.h */,
 				7C777B9C1F16167900A3BF91 /* AudioPlayer.m */,
+				1C7263C81F17C32E0017571E /* AudioItem.h */,
+				1C7263C91F17C32E0017571E /* AudioItem.m */,
 				7C777B711F1601E400A3BF91 /* Main.storyboard */,
 				7C777B741F1601E400A3BF91 /* Assets.xcassets */,
 				7C777B761F1601E400A3BF91 /* LaunchScreen.storyboard */,
@@ -287,6 +292,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7C777B701F1601E400A3BF91 /* ViewController.m in Sources */,
+				1C7263CA1F17C32E0017571E /* AudioItem.m in Sources */,
 				7C777B6D1F1601E400A3BF91 /* AppDelegate.m in Sources */,
 				7C777B6A1F1601E400A3BF91 /* main.m in Sources */,
 				7C777B9D1F16167900A3BF91 /* AudioPlayer.m in Sources */,
