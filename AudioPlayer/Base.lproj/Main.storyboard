@@ -53,12 +53,37 @@
                                     <action selector="start:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3p8-tI-OXy"/>
                                 </connections>
                             </button>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="TbG-pu-aWv">
+                                <rect key="frame" x="41" y="372" width="293" height="2"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </progressView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KHB-5y-Ceb">
+                                <rect key="frame" x="79" y="288" width="217" height="40"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="d3p-6m-7jx">
+                                <rect key="frame" x="41" y="408" width="293" height="2"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </progressView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
+                    <connections>
+                        <outlet property="bufferProgress" destination="d3p-6m-7jx" id="5mh-zn-zvA"/>
+                        <outlet property="lastBtn" destination="Eeb-Ug-9dL" id="Bph-ry-L6z"/>
+                        <outlet property="nextBtn" destination="qmk-UR-HJY" id="d3c-Pd-IqB"/>
+                        <outlet property="pauseBtn" destination="KQ7-pj-bRu" id="ttG-cG-3iM"/>
+                        <outlet property="playBtn" destination="1vu-em-dXI" id="WXO-AF-Zy4"/>
+                        <outlet property="progressView" destination="TbG-pu-aWv" id="nrc-pm-AzX"/>
+                        <outlet property="timeLabel" destination="KHB-5y-Ceb" id="atL-3R-gA5"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="24.800000000000001" y="36.431784107946029"/>
         </scene>
     </scenes>
 </document>

@@ -17,6 +17,12 @@
 /** AVPlayer */
 @property (nonatomic, strong) AVQueuePlayer *avplayer;
 
+/** Play Progress Block */
+@property (nonatomic, copy) void(^playProgressBlock)(NSTimeInterval current,NSTimeInterval total);
+
+/** Load Progress Block */
+@property (nonatomic, copy) void(^loadProgressBlock)(NSTimeInterval current,NSTimeInterval total);
+
 @end
 
 @implementation AudioPlayer
@@ -35,11 +41,28 @@
     AVQueuePlayer *avplayer = [[AVQueuePlayer alloc] initWithItems:self.playItemList];
     avplayer.volume = 0.5;
     self.avplayer = avplayer;
-    [self addObserver];
+    
+    __weak typeof(self)weakSelf = self;
+    //监控时间进度
+    [self.avplayer addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
+        __strong typeof(self)strongSelf = weakSelf;
+        
+        //当前播放的时间
+        NSTimeInterval current = CMTimeGetSeconds(time);
+        //视频的总时间
+        NSTimeInterval total = CMTimeGetSeconds(strongSelf.avplayer.currentItem.duration);
+        if (strongSelf.playProgressBlock) {
+            strongSelf.playProgressBlock(current,total);
+        }
+        
+    }];
 }
 
 - (AVPlayerItem *)playerItemWithUrl:(NSURL *)url {
     AVPlayerItem *item = [[AVPlayerItem alloc] initWithURL:url];
+    [self addObserverForItem:item];
+
+
     return item;
 }
 
@@ -48,6 +71,8 @@
 - (void)creatPlayList:(NSArray *)listArray {
     if (listArray && [listArray count] > 0) {
         [self addQueueToPlayerFromArray:listArray];
+        [self avplayerInit];
+
     }
 }
 
@@ -55,8 +80,8 @@
     if (item) {
         [self.playItemList addObject:item];
         AVPlayerItem *playerItem = [self playerItemWithUrl:[NSURL URLWithString:item]];
-        if ([self.avplayer canInsertItem:playerItem afterItem:[[self.avplayer items] lastObject]]) {
-            [self.avplayer insertItem:playerItem afterItem:[[self.avplayer items] lastObject]];
+        if ([self.avplayer canInsertItem:playerItem afterItem:nil]) {
+            [self.avplayer insertItem:playerItem afterItem:nil];
         }
     }
 }
@@ -75,6 +100,12 @@
     return self.avplayer.currentItem;
 }
 
+- (NSUInteger)getCurrentIndex {
+    AVPlayerItem *currentItem = [self.avplayer currentItem];
+    NSUInteger currentIndex = [self.playItemList indexOfObject:currentItem];
+    return currentIndex;
+}
+
 - (void)addQueueToPlayerFromArray:(NSArray *)array {
     for (NSString *url in array) {
         if (url && url.length > 0) {
@@ -82,7 +113,6 @@
             [self.playItemList addObject:item];
         }
     }
-    [self avplayerInit];
 
 }
 
@@ -100,52 +130,80 @@
     
 }
 
-- (void)next {
-    [self.avplayer advanceToNextItem];
+- (BOOL)next {
+    NSUInteger currentIndex = [self getCurrentIndex];
+    AVPlayerItem *currentItem = [self getCurrentPlayItem];
+    [currentItem seekToTime:kCMTimeZero];
+    
+    if (currentIndex < self.playItemList.count - 1) {
+        [self.avplayer advanceToNextItem];
+    }
+    
+//    if (currentIndex == self.playItemList.count - 1) {
+//        return NO;
+//    }
+    return YES;
+    
 }
 
-- (void)last {
-    AVPlayerItem *currentItem = [self.avplayer currentItem];
-    NSUInteger currentIndex = [self.playItemList indexOfObject:currentItem];
+- (BOOL)last {
+    NSUInteger currentIndex = [self getCurrentIndex];
+    
+
     if (currentIndex > 0) {
         AVPlayerItem *lastItem = [self.playItemList objectAtIndex:--currentIndex];
-        [self.avplayer replaceCurrentItemWithPlayerItem:lastItem];
-        [self play];
+        AVPlayerItem *currentItem = self.avplayer.currentItem;
+        [currentItem seekToTime:kCMTimeZero];
+        
+        // 交换两个Item
+        if ([self.avplayer canInsertItem:lastItem afterItem:currentItem]) {
+            [self.avplayer insertItem:lastItem afterItem:currentItem];
+            [self.avplayer advanceToNextItem];
+            
+            if ([self.avplayer canInsertItem:currentItem afterItem:lastItem]) {
+                [self.avplayer insertItem:currentItem afterItem:lastItem];
+            }   
+        }
+    
     }
+//    if (currentIndex ==  0) {
+//        return NO;
+//    }
+    return YES;
 }
 
 - (void)playbackFinished:(NSNotification *)notifi {
     
+    AVPlayerItem *item = notifi.object;
+    [item seekToTime:kCMTimeZero];
     NSLog(@"播放完成 %@",notifi);
     
 }
 
-- (void)playtime:(NSNotification *)notifi {
-    NSLog(@"时间改变 %@",notifi);
-    
+
+
+- (void)playProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))changedBlock {
+    _playProgressBlock = changedBlock;
+}
+
+- (void)loadProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))loadBlock {
+    _loadProgressBlock = loadBlock;
 }
 
 #pragma mark - Observer 
-- (void)addObserver {
+- (void)addObserverForItem:(AVPlayerItem *)item {
     //监控状态属性，注意AVPlayer也有一个status属性，通过监控它的status也可以获得播放状态
-    [self.avplayer.currentItem addObserver:self forKeyPath:@"status" options:(NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew) context:nil];
-    
+    [item addObserver:self forKeyPath:@"status" options:(NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew) context:nil];
+
     //监控缓冲加载情况属性
-    [self.avplayer.currentItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
-    
+    [item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
+    [item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
     //监控播放完成通知
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackFinished:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avplayer.currentItem];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playtime:) name:AVPlayerItemTimeJumpedNotification object:self.avplayer.currentItem];
-    
-    //监控时间进度
-    [self.avplayer addPeriodicTimeObserverForInterval:CMTimeMake(1, 1) queue:dispatch_get_main_queue() usingBlock:^(CMTime time) {
-        CMTimeShow(time);
-        
-    }];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackFinished:) name:AVPlayerItemDidPlayToEndTimeNotification object:item];
     
 }
 
-- (void)removeServer {
+- (void)removeServerForItem:(AVPlayerItem *)item {
     [self.avplayer.currentItem removeObserver:self forKeyPath:@"status"];
     [self.avplayer.currentItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
     [[NSNotificationCenter defaultCenter] removeObserver:AVPlayerItemDidPlayToEndTimeNotification];
@@ -155,10 +213,40 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
     
-    NSLog(@"%@--- %@",keyPath,change);
+    
+    AVPlayerItem *item = (AVPlayerItem *)object;
+
+    if ([keyPath isEqualToString:@"status"]) {
+        if (item.status == AVPlayerItemStatusReadyToPlay) {
+            NSLog(@"准备播放");
+
+        } else {
+            NSLog(@"播放错误");
+            
+        }
+        
+    } else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
+        NSTimeInterval loadTime = [self availableDurationWithplayerItem:item];
+        NSTimeInterval totalTime = CMTimeGetSeconds(item.duration);
+        if (_loadProgressBlock) {
+            _loadProgressBlock(loadTime,totalTime);
+        }
+        
+    } else if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
+        NSLog(@"playbackBufferEmpty %i",item.playbackBufferEmpty);
+    }
     
 }
 
+- (NSTimeInterval)availableDurationWithplayerItem:(AVPlayerItem *)playerItem
+{
+    NSArray *loadedTimeRanges = [playerItem loadedTimeRanges];
+    CMTimeRange timeRange = [loadedTimeRanges.firstObject CMTimeRangeValue];// 获取缓冲区域
+    NSTimeInterval startSeconds = CMTimeGetSeconds(timeRange.start);
+    NSTimeInterval durationSeconds = CMTimeGetSeconds(timeRange.duration);
+    NSTimeInterval result = startSeconds + durationSeconds;// 计算缓冲总进度
+    return result;
+}
 #pragma mark - Lazy Load
 
 - (NSMutableArray *)playItemList {
@@ -168,5 +256,11 @@
     return _playItemList;
 }
 
+- (BOOL)isPlay {
+    if (self.avplayer.rate > 0.0 && self.avplayer.error == nil) {
+        return YES;
+    }
+    return NO;
+}
 
 @end

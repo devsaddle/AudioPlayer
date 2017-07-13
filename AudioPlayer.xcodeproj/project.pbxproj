@@ -214,6 +214,11 @@
 						CreatedOnToolsVersion = 8.3.2;
 						DevelopmentTeam = 3D867GMJ4W;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					7C777B7D1F1601E400A3BF91 = {
 						CreatedOnToolsVersion = 8.3.2;
@@ -522,6 +527,7 @@
 				7C777B941F1601E500A3BF91 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		7C777B951F1601E500A3BF91 /* Build configuration list for PBXNativeTarget "AudioPlayerTests" */ = {
 			isa = XCConfigurationList;
@@ -530,6 +536,7 @@
 				7C777B971F1601E500A3BF91 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		7C777B981F1601E500A3BF91 /* Build configuration list for PBXNativeTarget "AudioPlayerUITests" */ = {
 			isa = XCConfigurationList;
@@ -538,6 +545,7 @@
 				7C777B9A1F1601E500A3BF91 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
