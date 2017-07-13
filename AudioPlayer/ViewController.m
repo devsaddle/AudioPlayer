@@ -34,13 +34,13 @@
                                                 @"http://121.17.126.239/mp3.9ku.com/hot/2011/12-13/461514.mp3",
                                                 @"http://win.web.re01.sycdn.kuwo.cn/resource/n2/85/26/3377023046.mp3"]];
     
-    [[AudioPlayer shareManager] playProgressValueChanged:^(NSTimeInterval current, NSTimeInterval total) {
+    [[AudioPlayer shareManager] playProgressValueChanged:^(AudioItem *currentItem,NSTimeInterval current, NSTimeInterval total) {
         [self.progressView setProgress:current/total animated:YES];
         self.timeLabel.text = [NSString stringWithFormat:@"%@/%@",[self formatPlayTime:current ],[self formatPlayTime:total]];
         
     }];
     
-    [[AudioPlayer shareManager] loadProgressValueChanged:^(NSTimeInterval current, NSTimeInterval total) {
+    [[AudioPlayer shareManager] loadProgressValueChanged:^(AudioItem *currentItem,NSTimeInterval current, NSTimeInterval total) {
         [self.bufferProgress setProgress:current/total animated:YES];
     }];
 }

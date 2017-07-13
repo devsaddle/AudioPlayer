@@ -11,20 +11,23 @@
 
 @interface AudioPlayer ()
 
-/** Play List */
-@property (nonatomic, strong) NSMutableArray *playItemList;
+/** AVPlayer Item List */
+@property (nonatomic, strong) NSMutableArray<AVPlayerItem *> *playItemList;
+
+/** Audio Item List */
+@property (nonatomic, strong) NSMutableArray<AudioItem *> *audioItemList;
 
 /** AVPlayer */
 @property (nonatomic, strong) AVQueuePlayer *avplayer;
 
 /** Play Progress Block */
-@property (nonatomic, copy) void(^playProgressBlock)(NSTimeInterval current,NSTimeInterval total);
+@property (nonatomic, copy) void(^playProgressBlock)(AudioItem *item ,NSTimeInterval current,NSTimeInterval total);
 
 /** Load Progress Block */
-@property (nonatomic, copy) void(^loadProgressBlock)(NSTimeInterval current,NSTimeInterval total);
+@property (nonatomic, copy) void(^loadProgressBlock)(AudioItem *item,NSTimeInterval current,NSTimeInterval total);
 
 /** Play Finsish  Block */
-@property (nonatomic, copy) void(^playFinishBlock)(id item);
+@property (nonatomic, copy) void(^playFinishBlock)(AudioItem *item);
 
 @end
 
@@ -60,53 +63,50 @@
         
         // 回调上层
         if (strongSelf.playProgressBlock) {
-            strongSelf.playProgressBlock(current,total);
+            strongSelf.playProgressBlock([strongSelf getCurrentPlayItem],current,total);
         }
         
     }];
 }
 
-- (AVPlayerItem *)playerItemWithUrl:(NSURL *)url {
-    AVPlayerItem *item = [[AVPlayerItem alloc] initWithURL:url];
-    [self addObserverForItem:item];
-    
-    return item;
-}
 
 #pragma mark - Data Handle
 
-- (void)creatPlayList:(NSArray *)listArray {
+- (void)creatPlayList:(NSArray<AudioItem *> *)listArray {
     if (listArray && [listArray count] > 0) {
+        [self.audioItemList addObjectsFromArray:listArray];
         [self addQueueToPlayerFromArray:listArray];
         [self avplayerInit];
 
     }
 }
 
-- (void)addItem:(id)item {
+- (void)addItem:(AudioItem *)item {
     if (item) {
-        [self.playItemList addObject:item];
-        AVPlayerItem *playerItem = [self playerItemWithUrl:[NSURL URLWithString:item]];
+        [self.audioItemList addObject:item];
+        AVPlayerItem *playerItem = [self avplayItemConvertForAudioItem:item];
+        [self.playItemList addObject:playerItem];
         if ([self.avplayer canInsertItem:playerItem afterItem:nil]) {
             [self.avplayer insertItem:playerItem afterItem:nil];
         }
     }
 }
 
-- (void)removeItem:(id)item {
-    [self.playItemList removeObject:item];
-    AVPlayerItem *playerItem = [self playerItemWithUrl:[NSURL URLWithString:item]];
+- (void)removeItem:(AudioItem *)item {
+    [self.audioItemList removeObject:item];
+    AVPlayerItem *playerItem = [self avplayItemConvertForAudioItem:item];
+    [self.playItemList removeObject:playerItem];
     [self removeObserverForItem:playerItem];
     [self.avplayer removeItem:playerItem];
 }
 
-- (NSArray *)getCurrentPlayList {
+- (NSArray<AudioItem *> *)getCurrentPlayList {
     return [self.playItemList copy];
 }
 
-- (id)getCurrentPlayItem {
-    // TODO: 对外数据包装
-    return self.avplayer.currentItem;
+- (AudioItem *)getCurrentPlayItem {
+    NSUInteger index = [self getCurrentIndex];
+    return self.audioItemList[index];
 }
 
 - (NSUInteger)getCurrentIndex {
@@ -115,14 +115,25 @@
     return currentIndex;
 }
 
-- (void)addQueueToPlayerFromArray:(NSArray *)array {
-    for (NSString *url in array) {
-        if (url && url.length > 0) {
-           AVPlayerItem *item = [self playerItemWithUrl:[NSURL URLWithString:url]];
-            [self.playItemList addObject:item];
+- (void)addQueueToPlayerFromArray:(NSArray<AudioItem *> *)array {
+    for (AudioItem *item in array) {
+        if (item.audioURL && item.audioURL.absoluteString.length > 0) {
+           AVPlayerItem *avItem = [self avplayItemConvertForAudioItem:item];
+            [self.playItemList addObject:avItem];
         }
     }
 
+}
+
+/**
+ 转换AVPlayerItem 模型
+ */
+- (AVPlayerItem *)avplayItemConvertForAudioItem:(AudioItem *)item {
+
+    AVPlayerItem *avItem = [[AVPlayerItem alloc] initWithURL:item.audioURL];
+    [self addObserverForItem:avItem];
+    
+    return avItem;
 }
 
 #pragma mark - Player Control
@@ -141,7 +152,7 @@
 
 - (BOOL)next {
     NSUInteger currentIndex = [self getCurrentIndex];
-    AVPlayerItem *currentItem = [self getCurrentPlayItem];
+    AVPlayerItem *currentItem = self.avplayer.currentItem;
     [currentItem seekToTime:kCMTimeZero];
     
     if (currentIndex < self.playItemList.count - 1) {
@@ -186,16 +197,16 @@
 
 #pragma mark - Call Back
 
-- (void)playFinish:(void(^)(id item))finishBlock {
+- (void)playFinish:(void(^)(AudioItem *item))finishBlock {
     _playFinishBlock = finishBlock;
 }
 
 
-- (void)playProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))changedBlock {
+- (void)playProgressValueChanged:(void(^)(AudioItem *currentItem, NSTimeInterval current,NSTimeInterval total))changedBlock {
     _playProgressBlock = changedBlock;
 }
 
-- (void)loadProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))loadBlock {
+- (void)loadProgressValueChanged:(void(^)(AudioItem *currentItem, NSTimeInterval current,NSTimeInterval total))loadBlock {
     _loadProgressBlock = loadBlock;
 }
 
@@ -239,7 +250,7 @@
         NSTimeInterval loadTime = [self availableDurationWithplayerItem:item];
         NSTimeInterval totalTime = CMTimeGetSeconds(item.duration);
         if (_loadProgressBlock) {
-            _loadProgressBlock(loadTime,totalTime);
+            _loadProgressBlock([self getCurrentPlayItem], loadTime,totalTime);
         }
         
     } else if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
@@ -262,9 +273,12 @@
     
     AVPlayerItem *item = notifi.object;
     [item seekToTime:kCMTimeZero];
+    
+    NSUInteger index = [self getCurrentIndex];
+    AudioItem *audioItem = self.audioItemList[index];
     if (_playFinishBlock) {
         // TODO: 对外数据包装
-        _playFinishBlock(item);
+        _playFinishBlock(audioItem);
     }
 }
 
@@ -275,6 +289,13 @@
         _playItemList = [NSMutableArray array];
     }
     return _playItemList;
+}
+
+- (NSMutableArray<AudioItem *> *)audioItemList {
+    if (_audioItemList == nil) {
+        _audioItemList = [NSMutableArray array];
+    }
+    return _audioItemList;
 }
 
 - (BOOL)isPlay {

@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "AudioItem.h"
 
 @interface AudioPlayer : NSObject
 /** 是否正在播放 */
@@ -16,11 +17,11 @@
 
 
 
-- (void)creatPlayList:(NSArray *)listArray;
-- (void)addItem:(id)item;
-- (void)removeItem:(id)item;
-- (NSArray *)getCurrentPlayList;
-- (id)getCurrentPlayItem;
+- (void)creatPlayList:(NSArray<AudioItem *> *)listArray;
+- (void)addItem:(AudioItem *)item;
+- (void)removeItem:(AudioItem *)item;
+- (NSArray<AudioItem *> *)getCurrentPlayList;
+- (AudioItem *)getCurrentPlayItem;
 - (NSUInteger)getCurrentIndex;
 
 - (void)play;
@@ -34,16 +35,16 @@
 /**
  播放完成回调
  */
-- (void)playFinish:(void(^)(id item))finishBlock;
+- (void)playFinish:(void(^)(AudioItem *item))finishBlock;
 
 /**
  播放进度回调
  */
-- (void)playProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))changedBlock;
+- (void)playProgressValueChanged:(void(^)(AudioItem *currentItem, NSTimeInterval current,NSTimeInterval total))changedBlock;
 
 /**
  加载进度回调
  */
-- (void)loadProgressValueChanged:(void(^)(NSTimeInterval current,NSTimeInterval total))loadBlock;
+- (void)loadProgressValueChanged:(void(^)(AudioItem *currentItem, NSTimeInterval current,NSTimeInterval total))loadBlock;
 
 @end

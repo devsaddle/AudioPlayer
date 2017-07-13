@@ -11,4 +11,8 @@
 @interface AudioItem : NSObject
 
 
+/** 音频播放地址 */
+@property (nonatomic, strong) NSURL *audioURL;
+
+
 @end
