@@ -6,7 +6,7 @@
 //  Copyright © 2017年 Yuan. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import "AudioItem.h"
 
 @interface AudioPlayer : NSObject

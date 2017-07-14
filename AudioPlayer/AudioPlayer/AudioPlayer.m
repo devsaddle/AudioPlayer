@@ -8,7 +8,7 @@
 
 #import "AudioPlayer.h"
 #import <AVFoundation/AVFoundation.h>
-#import <UIKit/UIKit.h>
+#import <MediaPlayer/MediaPlayer.h>
 
 @interface AudioPlayer ()
 
@@ -46,20 +46,15 @@
 #pragma mark - Remote Control
 - (void)remoteControlReceivedWithEvent:(UIEvent *)event {
     [[AudioPlayer shareManager] remoteControlReceivedWithEvent:event];
-    
 }
 
 - (BOOL)canBecomeFirstResponder {
     return YES;
-    
 }
-
 
 @end
 
 @implementation AudioPlayer
-
-
 
 + (instancetype)shareManager {
     static dispatch_once_t onceToken;
@@ -192,6 +187,8 @@
 
 - (void)play {
     [self.avplayer play];
+    [self configNowPlaying];
+
 }
 
 - (void)pause {
@@ -203,6 +200,7 @@
 }
 
 - (BOOL)next {
+
     NSUInteger currentIndex = [self getCurrentIndex];
     AVPlayerItem *currentItem = self.avplayer.currentItem;
     [currentItem seekToTime:kCMTimeZero];
@@ -247,6 +245,42 @@
 }
 
 
+- (void)configNowPlaying {
+    NSMutableDictionary *playInfo = [NSMutableDictionary dictionary];
+    /*
+     MPNowPlayingInfoPropertyElapsedPlaybackTime
+     MPNowPlayingInfoPropertyPlaybackRate
+     MPNowPlayingInfoPropertyDefaultPlaybackRate 
+     MPNowPlayingInfoPropertyPlaybackQueueIndex
+     MPNowPlayingInfoPropertyPlaybackQueueCount
+     MPNowPlayingInfoPropertyChapterNumber 
+     MPNowPlayingInfoPropertyChapterCount 
+     MPNowPlayingInfoPropertyIsLiveStream
+     MPNowPlayingInfoPropertyAvailableLanguageOptions
+     MPNowPlayingInfoLanguageOptionGroup
+     MPNowPlayingInfoPropertyCurrentLanguageOptions
+     MPNowPlayingInfoCollectionIdentifier 
+     MPNowPlayingInfoPropertyExternalContentIdentifier
+     MPNowPlayingInfoPropertyExternalUserProfileIdenti
+     MPNowPlayingInfoPropertyPlaybackProgress
+     MPNowPlayingInfoPropertyMediaType
+     MPNowPlayingInfoPropertyAssetURL
+     */
+    
+    [playInfo setObject:@(self.playItemList.count) forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
+    [playInfo setObject:@([self getCurrentIndex]) forKey:MPNowPlayingInfoPropertyPlaybackQueueIndex];
+    [playInfo setObject:@"这是title，当然要测试它很长的时候显示效果怎样" forKey:MPMediaItemPropertyTitle];
+    [playInfo setObject:@"这是作者，稍微长一点" forKey:MPMediaItemPropertyArtist];
+    
+    MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage:[UIImage imageNamed:@"pushu.jpg"]];
+    [playInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
+    
+    [playInfo setObject:@(CMTimeGetSeconds(self.avplayer.currentItem.duration)) forKey:MPMediaItemPropertyPlaybackDuration];
+    [playInfo setObject:@(CMTimeGetSeconds(self.avplayer.currentTime)) forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    [playInfo setObject:@(1) forKey:MPNowPlayingInfoPropertyPlaybackRate];
+
+    [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:playInfo];
+}
 
 #pragma mark - Remote Control
 - (void)remoteControlReceivedWithEvent:(UIEvent *)event {
