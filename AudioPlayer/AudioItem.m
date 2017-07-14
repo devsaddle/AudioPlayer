@@ -10,4 +10,16 @@
 
 @implementation AudioItem
 
+- (instancetype)initWithURL:(NSURL *)url {
+    self = [super init];
+    if (self) {
+        _audioURL = url;
+    }
+    return self;
+}
+
++ (instancetype)itemWithURL:(NSURL *)url {
+    AudioItem *item = [[AudioItem alloc] initWithURL:url];
+    return item;
+}
 @end

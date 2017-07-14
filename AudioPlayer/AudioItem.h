@@ -15,4 +15,7 @@
 @property (nonatomic, strong) NSURL *audioURL;
 
 
+
+- (instancetype)initWithURL:(NSURL *)url;
++ (instancetype)itemWithURL:(NSURL *)url;
 @end
