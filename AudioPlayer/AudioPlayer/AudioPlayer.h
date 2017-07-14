@@ -10,6 +10,7 @@
 #import "AudioItem.h"
 
 @interface AudioPlayer : NSObject
+
 /** 是否正在播放 */
 @property (nonatomic, assign) BOOL isPlay;
 

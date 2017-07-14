@@ -8,6 +8,7 @@
 
 #import "AudioPlayer.h"
 #import <AVFoundation/AVFoundation.h>
+#import <UIKit/UIKit.h>
 
 @interface AudioPlayer ()
 
@@ -29,9 +30,36 @@
 /** Play Finsish  Block */
 @property (nonatomic, copy) void(^playFinishBlock)(AudioItem *item);
 
+
+- (void)remoteControlReceivedWithEvent:(UIEvent *)event;
+
+@end
+
+@implementation UIApplication (AudioRemote)
+
+- (void)configRemotePlay {
+    [self beginReceivingRemoteControlEvents];
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:nil];
+    [[AVAudioSession sharedInstance] setActive:YES error:nil];
+}
+
+#pragma mark - Remote Control
+- (void)remoteControlReceivedWithEvent:(UIEvent *)event {
+    [[AudioPlayer shareManager] remoteControlReceivedWithEvent:event];
+    
+}
+
+- (BOOL)canBecomeFirstResponder {
+    return YES;
+    
+}
+
+
 @end
 
 @implementation AudioPlayer
+
+
 
 + (instancetype)shareManager {
     static dispatch_once_t onceToken;
@@ -42,11 +70,15 @@
     return instance;
 }
 
+
 #pragma mark - Player Init
 - (void)avplayerInit {
     AVQueuePlayer *avplayer = [[AVQueuePlayer alloc] initWithItems:self.playItemList];
     avplayer.volume = 1.0;
     self.avplayer = avplayer;
+    
+    // 配置远程控制
+    [[UIApplication sharedApplication] configRemotePlay];
     
     //监控播放完成通知
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(playbackFinished:) name:AVPlayerItemDidPlayToEndTimeNotification object:self.avplayer.currentItem];
@@ -215,6 +247,35 @@
 }
 
 
+
+#pragma mark - Remote Control
+- (void)remoteControlReceivedWithEvent:(UIEvent *)event {
+    NSLog(@"%ld",event.subtype);
+    
+    switch (event.subtype)    {
+        case UIEventSubtypeRemoteControlPlay:
+            [self play];
+            break;
+        case UIEventSubtypeRemoteControlPause:
+            [self pause];
+            break;
+        case UIEventSubtypeRemoteControlNextTrack:
+            [self next];
+            break;
+        case UIEventSubtypeRemoteControlPreviousTrack:
+            [self last];
+            break;
+        case UIEventSubtypeRemoteControlTogglePlayPause:
+            [self isPlay] ? [self pause]: [self play];
+            break;
+        default:
+            break;
+            
+    }
+    
+}
+                                        
+                                        
 #pragma mark - Call Back
 
 - (void)playFinish:(void(^)(AudioItem *item))finishBlock {
@@ -323,4 +384,8 @@
     return NO;
 }
 
+
+
 @end
+
+
