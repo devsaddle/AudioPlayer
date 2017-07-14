@@ -16,10 +16,12 @@
 + (instancetype)shareManager;
 
 
-
 - (void)creatPlayList:(NSArray<AudioItem *> *)listArray;
+
 - (void)addItem:(AudioItem *)item;
 - (void)removeItem:(AudioItem *)item;
+- (void)removeAllItem;
+
 - (NSArray<AudioItem *> *)getCurrentPlayList;
 - (AudioItem *)getCurrentPlayItem;
 - (NSUInteger)getCurrentIndex;
@@ -29,7 +31,6 @@
 - (void)stop;
 - (BOOL)next;
 - (BOOL)last;
-
 
 
 /**

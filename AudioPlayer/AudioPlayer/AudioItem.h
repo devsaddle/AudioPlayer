@@ -10,12 +10,14 @@
 
 @interface AudioItem : NSObject
 
+/** ID 用来标示音频的唯一性 */
+@property (nonatomic, copy) NSString *itemID;
 
 /** 音频播放地址 */
 @property (nonatomic, strong) NSURL *audioURL;
 
 
 
-- (instancetype)initWithURL:(NSURL *)url;
-+ (instancetype)itemWithURL:(NSURL *)url;
+- (instancetype)initWithID:(NSString *)itemID url:(NSURL *)url;
++ (instancetype)itemWithID:(NSString *)itemID url:(NSURL *)url;
 @end

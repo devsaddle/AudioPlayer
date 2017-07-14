@@ -82,11 +82,12 @@
 }
 
 - (void)addItem:(AudioItem *)item {
-    if (item) {
-        [self.audioItemList addObject:item];
+    if (item && ![self filterListWithItem:item]) {
         AVPlayerItem *playerItem = [self avplayItemConvertForAudioItem:item];
-        [self.playItemList addObject:playerItem];
+
         if ([self.avplayer canInsertItem:playerItem afterItem:nil]) {
+            [self.playItemList addObject:playerItem];
+            [self.audioItemList addObject:item];
             [self.avplayer insertItem:playerItem afterItem:nil];
         }
     }
@@ -100,8 +101,14 @@
     [self.avplayer removeItem:playerItem];
 }
 
+- (void)removeAllItem {
+    [self.avplayer removeAllItems];
+    [self.playItemList removeAllObjects];
+    [self.audioItemList removeAllObjects];
+}
+
 - (NSArray<AudioItem *> *)getCurrentPlayList {
-    return [self.playItemList copy];
+    return [self.audioItemList copy];
 }
 
 - (AudioItem *)getCurrentPlayItem {
@@ -134,6 +141,19 @@
     [self addObserverForItem:avItem];
     
     return avItem;
+}
+
+// 判断 Item列表是否存在相同的资源
+- (BOOL)filterListWithItem:(AudioItem *)item {
+    if ([self.audioItemList containsObject:item]) {
+        return YES;
+    }
+    for (AudioItem *tempItem in self.audioItemList) {
+        if ([tempItem.itemID isEqualToString:item.itemID]) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 #pragma mark - Player Control
@@ -225,9 +245,9 @@
 }
 
 - (void)removeObserverForItem:(AVPlayerItem *)item {
-    [self.avplayer.currentItem removeObserver:self forKeyPath:@"status"];
-    [self.avplayer.currentItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
-    [self.avplayer.currentItem removeObserver:self forKeyPath:@"playbackBufferEmpty"];
+    [item removeObserver:self forKeyPath:@"status"];
+    [item removeObserver:self forKeyPath:@"loadedTimeRanges"];
+    [item removeObserver:self forKeyPath:@"playbackBufferEmpty"];
     
 }
 
@@ -277,20 +297,18 @@
     NSUInteger index = [self getCurrentIndex];
     AudioItem *audioItem = self.audioItemList[index];
     if (_playFinishBlock) {
-        // TODO: 对外数据包装
         _playFinishBlock(audioItem);
     }
 }
 
 #pragma mark - Lazy Load
 
-- (NSMutableArray *)playItemList {
+- (NSMutableArray<AVPlayerItem *> *)playItemList {
     if (_playItemList == nil) {
         _playItemList = [NSMutableArray array];
     }
     return _playItemList;
 }
-
 - (NSMutableArray<AudioItem *> *)audioItemList {
     if (_audioItemList == nil) {
         _audioItemList = [NSMutableArray array];
