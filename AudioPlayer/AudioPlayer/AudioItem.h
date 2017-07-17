@@ -6,7 +6,7 @@
 //  Copyright © 2017年 Yuan. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface AudioItem : NSObject
 
@@ -15,6 +15,15 @@
 
 /** 音频播放地址 */
 @property (nonatomic, strong) NSURL *audioURL;
+
+/** 标题（显示于NowPlaying 界面） */
+@property (nonatomic, copy) NSString *title;
+
+/** 艺术家 作者 */
+@property (nonatomic, copy) NSString *artist;
+
+/** Image (专辑封面) */
+@property (nonatomic, strong) UIImage *image;
 
 
 

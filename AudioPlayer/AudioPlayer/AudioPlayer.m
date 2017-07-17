@@ -187,12 +187,12 @@
 
 - (void)play {
     [self.avplayer play];
-    [self configNowPlaying];
 
 }
 
 - (void)pause {
     [self.avplayer pause];
+    [self configNowPlaying];
 }
 
 - (void)stop {
@@ -246,7 +246,6 @@
 
 
 - (void)configNowPlaying {
-    NSMutableDictionary *playInfo = [NSMutableDictionary dictionary];
     /*
      MPNowPlayingInfoPropertyElapsedPlaybackTime
      MPNowPlayingInfoPropertyPlaybackRate
@@ -266,15 +265,20 @@
      MPNowPlayingInfoPropertyMediaType
      MPNowPlayingInfoPropertyAssetURL
      */
+    AudioItem *currentItem = [self getCurrentPlayItem];
     
+    NSMutableDictionary *playInfo = [NSMutableDictionary dictionary];
+
     [playInfo setObject:@(self.playItemList.count) forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
     [playInfo setObject:@([self getCurrentIndex]) forKey:MPNowPlayingInfoPropertyPlaybackQueueIndex];
-    [playInfo setObject:@"这是title，当然要测试它很长的时候显示效果怎样" forKey:MPMediaItemPropertyTitle];
-    [playInfo setObject:@"这是作者，稍微长一点" forKey:MPMediaItemPropertyArtist];
+    [playInfo setObject:[NSString stringWithFormat:@"%@",currentItem.title] forKey:MPMediaItemPropertyTitle];
+    [playInfo setObject:[NSString stringWithFormat:@"%@",currentItem.artist]  forKey:MPMediaItemPropertyArtist];
     
-    MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage:[UIImage imageNamed:@"pushu.jpg"]];
-    [playInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
-    
+    if (currentItem.image) {
+        MPMediaItemArtwork *artwork = [[MPMediaItemArtwork alloc] initWithImage:currentItem.image];
+        [playInfo setObject:artwork forKey:MPMediaItemPropertyArtwork];
+    }
+
     [playInfo setObject:@(CMTimeGetSeconds(self.avplayer.currentItem.duration)) forKey:MPMediaItemPropertyPlaybackDuration];
     [playInfo setObject:@(CMTimeGetSeconds(self.avplayer.currentTime)) forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
     [playInfo setObject:@(1) forKey:MPNowPlayingInfoPropertyPlaybackRate];
@@ -355,6 +359,7 @@
     if ([keyPath isEqualToString:@"status"]) {
         if (item.status == AVPlayerItemStatusReadyToPlay) {
             NSLog(@"准备播放");
+            [self configNowPlaying];
 
         } else {
             NSLog(@"播放错误");
