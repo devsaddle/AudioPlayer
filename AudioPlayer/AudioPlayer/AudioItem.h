@@ -26,7 +26,9 @@
 @property (nonatomic, strong) UIImage *image;
 
 
+- (instancetype)initWithUrl:(NSURL *)url itemID:(NSString *)itemID;
++ (instancetype)itemWithUrl:(NSURL *)url itemID:(NSString *)itemID;
 
-- (instancetype)initWithID:(NSString *)itemID url:(NSURL *)url;
-+ (instancetype)itemWithID:(NSString *)itemID url:(NSURL *)url;
+- (instancetype)initWithUrl:(NSURL *)url title:(NSString *)title artist:(NSString *)artist image:(UIImage *)image itemID:(NSString *)itemID;
++ (instancetype)itemWithUrl:(NSURL *)url title:(NSString *)title artist:(NSString *)artist image:(UIImage *)image itemID:(NSString *)itemID;
 @end

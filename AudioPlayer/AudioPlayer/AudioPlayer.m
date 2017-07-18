@@ -187,7 +187,7 @@
 
 - (void)play {
     [self.avplayer play];
-
+    [self configNowPlaying];
 }
 
 - (void)pause {
@@ -281,7 +281,7 @@
 
     [playInfo setObject:@(CMTimeGetSeconds(self.avplayer.currentItem.duration)) forKey:MPMediaItemPropertyPlaybackDuration];
     [playInfo setObject:@(CMTimeGetSeconds(self.avplayer.currentTime)) forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-    [playInfo setObject:@(1) forKey:MPNowPlayingInfoPropertyPlaybackRate];
+    [playInfo setObject:[self isPlay] ? @(1) : @(0) forKey:MPNowPlayingInfoPropertyPlaybackRate];
 
     [[MPNowPlayingInfoCenter defaultCenter] setNowPlayingInfo:playInfo];
 }
