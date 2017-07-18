@@ -79,9 +79,6 @@
     BOOL next = [[AudioPlayer shareManager] next];
     self.nextBtn.enabled = next;
 }
-//- (void)remoteControlReceivedWithEvent:(UIEvent *)event {
-//    
-//    
-//}
+
 
 @end
