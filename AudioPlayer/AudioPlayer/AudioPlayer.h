@@ -49,4 +49,12 @@
  */
 - (void)loadProgressValueChanged:(void(^)(AudioItem *currentItem, NSTimeInterval current,NSTimeInterval total))loadBlock;
 
+/**
+ 设置播放进度
+ 当滑动修改进度的时候，建议滑动动作结束后一次性设置改值
+ @param value 播放比（0~1）
+ @param completionHandler 回调
+ */
+- (void)seekToValue:(CGFloat)value completionHandler:(void (^)(BOOL finished))completionHandler;
+
 @end

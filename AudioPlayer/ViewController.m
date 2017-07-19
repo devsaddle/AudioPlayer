@@ -11,7 +11,8 @@
 
 @interface ViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *timeLabel;
-@property (weak, nonatomic) IBOutlet UIProgressView *progressView;
+@property (weak, nonatomic) IBOutlet UISlider *sliderView;
+
 @property (weak, nonatomic) IBOutlet UIProgressView *bufferProgress;
 
 @property (weak, nonatomic) IBOutlet UIButton *lastBtn;
@@ -36,7 +37,7 @@
                                                 ]];
     
     [[AudioPlayer shareManager] playProgressValueChanged:^(AudioItem *currentItem,NSTimeInterval current, NSTimeInterval total) {
-        [self.progressView setProgress:current/total animated:YES];
+        [self.sliderView setValue:current/total animated:YES];
         self.timeLabel.text = [NSString stringWithFormat:@"%@/%@",[self formatPlayTime:current ],[self formatPlayTime:total]];
         
     }];
@@ -79,6 +80,15 @@
     BOOL next = [[AudioPlayer shareManager] next];
     self.nextBtn.enabled = next;
 }
+
+- (IBAction)sliderChanged:(UISlider *)sender {
+
+    [[AudioPlayer shareManager] seekToValue:sender.value completionHandler:^(BOOL finished) {
+        NSLog(@"%i",finished);
+    }];
+    
+}
+
 
 
 @end

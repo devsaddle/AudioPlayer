@@ -200,7 +200,7 @@
 }
 
 - (BOOL)next {
-
+    
     NSUInteger currentIndex = [self getCurrentIndex];
     AVPlayerItem *currentItem = self.avplayer.currentItem;
     [currentItem seekToTime:kCMTimeZero];
@@ -329,7 +329,27 @@
     _loadProgressBlock = loadBlock;
 }
 
+- (void)seekToValue:(CGFloat)value completionHandler:(void (^)(BOOL finished))completionHandler {
+    AVPlayerItem *currentItem = self.avplayer.currentItem;
+    if (value < 0 || value > 1) {
 
+        if (completionHandler) {
+            completionHandler(YES);
+        }
+        return;
+    }
+    
+    
+    Float64 dura = CMTimeGetSeconds(currentItem.duration);
+    int64_t time = dura * value;
+    
+    [currentItem seekToTime:CMTimeMake(time , 1) completionHandler:^(BOOL finished) {
+        
+        if (completionHandler) {
+            completionHandler(finished);
+        }
+    }];
+}
 
 #pragma mark - Observer 
 - (void)addObserverForItem:(AVPlayerItem *)item {
