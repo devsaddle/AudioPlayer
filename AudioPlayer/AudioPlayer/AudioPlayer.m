@@ -359,15 +359,20 @@
     //监控缓冲加载情况属性
     [item addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionOld|NSKeyValueObservingOptionNew context:nil];
     
+    // 监控播放区域缓存是否为空
     [item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
     
+    // 监控缓存是否可以播放
+    [item addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew context:nil];
+
 }
 
 - (void)removeObserverForItem:(AVPlayerItem *)item {
     [item removeObserver:self forKeyPath:@"status"];
     [item removeObserver:self forKeyPath:@"loadedTimeRanges"];
     [item removeObserver:self forKeyPath:@"playbackBufferEmpty"];
-    
+    [item removeObserver:self forKeyPath:@"playbackLikelyToKeepUp"];
+
 }
 
 
@@ -395,6 +400,9 @@
         
     } else if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
         NSLog(@"playbackBufferEmpty %i",item.playbackBufferEmpty);
+        
+    } else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"]) {
+        NSLog(@"playbackLikelyToKeepUp %i",item.playbackLikelyToKeepUp);
     }
     
 }

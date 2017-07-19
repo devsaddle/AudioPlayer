@@ -84,7 +84,7 @@
 - (IBAction)sliderChanged:(UISlider *)sender {
 
     [[AudioPlayer shareManager] seekToValue:sender.value completionHandler:^(BOOL finished) {
-        NSLog(@"%i",finished);
+
     }];
     
 }
