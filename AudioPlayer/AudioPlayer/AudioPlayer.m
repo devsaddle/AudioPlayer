@@ -362,6 +362,7 @@
     // 监控播放区域缓存是否为空
     [item addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:nil];
     
+    
     // 监控缓存是否可以播放
     [item addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew context:nil];
 
